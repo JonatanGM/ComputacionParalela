@@ -58,12 +58,93 @@ int Ctimer(double *elapsed, double *ucpu, double *scpu, int reset)
 }
 
 extern "C"
-{
-jstring
-Java_uniovi_es_computacionparalela_MainActivity_multiplicacionOpenMP(
-        JNIEnv *env,
-        jobject /* this */) {
+JNIEXPORT jdouble JNICALL
+Java_uniovi_es_computacionparalela_MainActivity_multiplicacionSecuencial(JNIEnv *env,
+                                                                         jobject instance,
+                                                                         jint dimA, jint dimB,
+                                                                         jint dimC) {
 
+        int
+                Fil_A, Fil_B, Fil_C,
+                Col_A, Col_B, Col_C, i, j, r;
+
+        double
+                *MatA = NULL,
+                *MatB = NULL,
+                *MatC = NULL,
+                elapsed, ucpu, scpu;
+
+        Fil_C = Fil_A = dimA;
+        Col_C = Col_B = dimB;
+        Fil_B = Col_A = dimC;
+
+        /* Comprobando que ninguna dimension es nula */
+        if ((Fil_A == 0) || (Col_A == 0) || (Col_B == 0)) {
+                //return env->NewStringUTF("Error 1: Alguna dimension es nula.\n");
+                return 0;
+        }
+
+        /* Comprobando que las dimensiones de A y B son compatibles */
+        if (Col_A != Fil_B) {
+                //return env->NewStringUTF("Error 2: El numero de Columnas de A y el numero de Filas de B no coinciden.\n");
+                return 0;
+        }
+
+        MatA = (double *) malloc(Fil_A * Col_A * sizeof(double));
+        if (MatA == NULL) {
+                //return env->NewStringUTF("Error 3: Problemas reservando memoria para la Matriz A.\n");
+                return 0;
+        }
+
+        MatB = (double *) malloc(Fil_B * Col_B * sizeof(double));
+        if (MatB == NULL) {
+                free(MatA);
+                MatA = NULL;
+                return 0;
+                //return env->NewStringUTF("Error 4: Problemas reservando memoria para la Matriz B.\n");
+        }
+
+        MatC = (double *) calloc(Fil_C * Col_C, sizeof(double));
+        if (MatC == NULL) {
+                free(MatA);
+                MatA = NULL;
+                free(MatB);
+                MatB = NULL;
+                return 0;
+                //return env->NewStringUTF("Error 6: Problemas reservando memoria para la Matriz C de Naive.\n");
+        }
+
+        Genera_Mat(MatA, Fil_A, Col_A, 2121);
+        Genera_Mat(MatB, Fil_B, Col_B, 2032);
+
+
+        Ctimer(&elapsed, &ucpu, &scpu, 0);
+
+        for (i = 0; i < Fil_A; i++)
+                for (j = 0; j < Col_B; j++)
+                        for (r = 0; r < Fil_B; r++)
+                                MatC[i * Col_B + j] = MatC[i * Col_B + j] +
+                                                      MatA[i * Col_A + r] * MatB[j * Col_B + r];
+
+        Ctimer(&elapsed, &ucpu, &scpu, 1);
+
+
+        free(MatA);
+        MatA = NULL;
+        free(MatB);
+        MatB = NULL;
+        free(MatC);
+        MatC = NULL;
+
+        return elapsed;
+
+}
+
+extern "C"
+JNIEXPORT jdouble JNICALL
+Java_uniovi_es_computacionparalela_MainActivity_multiplicacionOpenMP(JNIEnv *env, jobject instance,
+                                                                     jint dimA, jint dimB,
+                                                                     jint dimC) {
 
         int
                 Fil_A, Fil_B, Fil_C,
@@ -76,33 +157,34 @@ Java_uniovi_es_computacionparalela_MainActivity_multiplicacionOpenMP(
                 elapsed, ucpu, scpu;
 
 
-        Fil_C = Fil_A = 100;
-        Col_C = Col_B = 100;
-        Fil_B = Col_A = 100;
+        Fil_C = Fil_A = dimA;
+        Col_C = Col_B = dimB;
+        Fil_B = Col_A = dimC;
 
         /* Comprobando que ninguna dimension es nula */
         if ((Fil_A == 0) || (Col_A == 0) || (Col_B == 0)) {
-                return env->NewStringUTF("Error 1: Alguna dimension es nula.\n");
+                //return env->NewStringUTF("Error 1: Alguna dimension es nula.\n");
+                return 0;
         }
 
         /* Comprobando que las dimensiones de A y B son compatibles */
         if (Col_A != Fil_B) {
-                return env->NewStringUTF(
-                        "Error 2: El numero de Columnas de A y el numero de Filas de B no coinciden.\n");
+                //return env->NewStringUTF("Error 2: El numero de Columnas de A y el numero de Filas de B no coinciden.\n");
+                return 0;
         }
 
         MatA = (double *) malloc(Fil_A * Col_A * sizeof(double));
         if (MatA == NULL) {
-                return env->NewStringUTF(
-                        "Error 3: Problemas reservando memoria para la Matriz A.\n");
+                //return env->NewStringUTF("Error 3: Problemas reservando memoria para la Matriz A.\n");
+                return 0;
         }
 
         MatB = (double *) malloc(Fil_B * Col_B * sizeof(double));
         if (MatB == NULL) {
                 free(MatA);
                 MatA = NULL;
-                return env->NewStringUTF(
-                        "Error 4: Problemas reservando memoria para la Matriz B.\n");
+                return 0;
+                //return env->NewStringUTF("Error 4: Problemas reservando memoria para la Matriz B.\n");
         }
 
         MatC = (double *) calloc(Fil_C * Col_C, sizeof(double));
@@ -111,8 +193,8 @@ Java_uniovi_es_computacionparalela_MainActivity_multiplicacionOpenMP(
                 MatA = NULL;
                 free(MatB);
                 MatB = NULL;
-                return env->NewStringUTF(
-                        "Error 6: Problemas reservando memoria para la Matriz C de Naive.\n");
+                return 0;
+                //return env->NewStringUTF("Error 6: Problemas reservando memoria para la Matriz C de Naive.\n");
         }
 
         Genera_Mat(MatA, Fil_A, Col_A, 2121);
@@ -123,105 +205,7 @@ Java_uniovi_es_computacionparalela_MainActivity_multiplicacionOpenMP(
 
         Ctimer(&elapsed, &ucpu, &scpu, 0);
 
-#pragma omp parallel for
-        for (i = 0; i < Fil_A; i++)
-                for (j = 0; j < Col_B; j++)
-                        for (r = 0; r < Fil_B; r++)
-                                MatC[i * Col_B + j] = MatC[i * Col_B + j] +
-                                                      MatA[i * Col_A + r] * MatB[j * Col_B + r];
-
-        Ctimer(&elapsed, &ucpu, &scpu, 1);
-
-
-        free(MatA);
-        MatA = NULL;
-        free(MatB);
-        MatB = NULL;
-        free(MatC);
-        MatC = NULL;
-//
-//        Ctimer(&elapsedSec, &ucpu, &scpu, 0);
-//
-//        for (i=0; i<Fil_A; i++)
-//                for (j = 0; j < Col_B; j++)
-//                        for (r = 0; r < Fil_B; r++)
-//                                MatD[i * Col_B + j] = MatD[i * Col_B + j] +
-//                                                      MatA[i * Col_A + r] * MatB[j * Col_B + r];
-//
-//        Ctimer(&elapsedSec, &ucpu, &scpu, 1);
-
-
-
-        char aux[100];
-        sprintf(aux, "Numero de procesadores: %d tiempo transcurrido openMP: %f Num hilos: %d",
-                omp_get_num_procs(), elapsed, omp_get_num_threads());
-        std::string str(aux);
-
-        return env->NewStringUTF(str.c_str());
-}
-
-jstring
-Java_uniovi_es_computacionparalela_MainActivity_multiplicacionSecuencial(
-        JNIEnv *env,
-        jobject /* this */) {
-
-
-        int
-                Fil_A, Fil_B, Fil_C,
-                Col_A, Col_B, Col_C, i, j, r;
-
-        double
-                *MatA = NULL,
-                *MatB = NULL,
-                *MatC = NULL,
-                elapsed, ucpu, scpu;
-
-
-        Fil_C = Fil_A = 100;
-        Col_C = Col_B = 100;
-        Fil_B = Col_A = 100;
-
-        /* Comprobando que ninguna dimension es nula */
-        if ((Fil_A == 0) || (Col_A == 0) || (Col_B == 0)) {
-                return env->NewStringUTF("Error 1: Alguna dimension es nula.\n");
-        }
-
-        /* Comprobando que las dimensiones de A y B son compatibles */
-        if (Col_A != Fil_B) {
-                return env->NewStringUTF(
-                        "Error 2: El numero de Columnas de A y el numero de Filas de B no coinciden.\n");
-        }
-
-        MatA = (double *) malloc(Fil_A * Col_A * sizeof(double));
-        if (MatA == NULL) {
-                return env->NewStringUTF(
-                        "Error 3: Problemas reservando memoria para la Matriz A.\n");
-        }
-
-        MatB = (double *) malloc(Fil_B * Col_B * sizeof(double));
-        if (MatB == NULL) {
-                free(MatA);
-                MatA = NULL;
-                return env->NewStringUTF(
-                        "Error 4: Problemas reservando memoria para la Matriz B.\n");
-        }
-
-        MatC = (double *) calloc(Fil_C * Col_C, sizeof(double));
-        if (MatC == NULL) {
-                free(MatA);
-                MatA = NULL;
-                free(MatB);
-                MatB = NULL;
-                return env->NewStringUTF(
-                        "Error 6: Problemas reservando memoria para la Matriz C de Naive.\n");
-        }
-
-        Genera_Mat(MatA, Fil_A, Col_A, 2121);
-        Genera_Mat(MatB, Fil_B, Col_B, 2032);
-
-
-        Ctimer(&elapsed, &ucpu, &scpu, 0);
-
+        #pragma omp parallel for
         for (i = 0; i < Fil_A; i++)
                 for (j = 0; j < Col_B; j++)
                         for (r = 0; r < Fil_B; r++)
@@ -238,12 +222,9 @@ Java_uniovi_es_computacionparalela_MainActivity_multiplicacionSecuencial(
         free(MatC);
         MatC = NULL;
 
-        char aux[100];
-        sprintf(aux, "Numero de procesadores: %d tiempo transcurrido: %f",
-                omp_get_num_procs(), elapsed);
-        std::string str(aux);
+        return (jdouble)elapsed ;
 
-        return env->NewStringUTF(str.c_str());
 }
-}
+
+
 
