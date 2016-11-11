@@ -81,26 +81,26 @@ Java_uniovi_es_computacionparalela_MainActivity_multiplicacionSecuencial(JNIEnv 
         /* Comprobando que ninguna dimension es nula */
         if ((Fil_A == 0) || (Col_A == 0) || (Col_B == 0)) {
                 //return env->NewStringUTF("Error 1: Alguna dimension es nula.\n");
-                return 0;
+                return -1;
         }
 
         /* Comprobando que las dimensiones de A y B son compatibles */
         if (Col_A != Fil_B) {
                 //return env->NewStringUTF("Error 2: El numero de Columnas de A y el numero de Filas de B no coinciden.\n");
-                return 0;
+                return -2;
         }
 
         MatA = (double *) malloc(Fil_A * Col_A * sizeof(double));
         if (MatA == NULL) {
                 //return env->NewStringUTF("Error 3: Problemas reservando memoria para la Matriz A.\n");
-                return 0;
+                return -3;
         }
 
         MatB = (double *) malloc(Fil_B * Col_B * sizeof(double));
         if (MatB == NULL) {
                 free(MatA);
                 MatA = NULL;
-                return 0;
+                return -4;
                 //return env->NewStringUTF("Error 4: Problemas reservando memoria para la Matriz B.\n");
         }
 
@@ -110,7 +110,7 @@ Java_uniovi_es_computacionparalela_MainActivity_multiplicacionSecuencial(JNIEnv 
                 MatA = NULL;
                 free(MatB);
                 MatB = NULL;
-                return 0;
+                return -5;
                 //return env->NewStringUTF("Error 6: Problemas reservando memoria para la Matriz C de Naive.\n");
         }
 
@@ -164,26 +164,26 @@ Java_uniovi_es_computacionparalela_MainActivity_multiplicacionOpenMP(JNIEnv *env
         /* Comprobando que ninguna dimension es nula */
         if ((Fil_A == 0) || (Col_A == 0) || (Col_B == 0)) {
                 //return env->NewStringUTF("Error 1: Alguna dimension es nula.\n");
-                return 0;
+                return -1;
         }
 
         /* Comprobando que las dimensiones de A y B son compatibles */
         if (Col_A != Fil_B) {
                 //return env->NewStringUTF("Error 2: El numero de Columnas de A y el numero de Filas de B no coinciden.\n");
-                return 0;
+                return -2;
         }
 
         MatA = (double *) malloc(Fil_A * Col_A * sizeof(double));
         if (MatA == NULL) {
                 //return env->NewStringUTF("Error 3: Problemas reservando memoria para la Matriz A.\n");
-                return 0;
+                return -3;
         }
 
         MatB = (double *) malloc(Fil_B * Col_B * sizeof(double));
         if (MatB == NULL) {
                 free(MatA);
                 MatA = NULL;
-                return 0;
+                return -4;
                 //return env->NewStringUTF("Error 4: Problemas reservando memoria para la Matriz B.\n");
         }
 
@@ -193,7 +193,7 @@ Java_uniovi_es_computacionparalela_MainActivity_multiplicacionOpenMP(JNIEnv *env
                 MatA = NULL;
                 free(MatB);
                 MatB = NULL;
-                return 0;
+                return -5;
                 //return env->NewStringUTF("Error 6: Problemas reservando memoria para la Matriz C de Naive.\n");
         }
 

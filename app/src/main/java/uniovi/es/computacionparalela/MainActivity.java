@@ -1,8 +1,15 @@
 package uniovi.es.computacionparalela;
 
+import android.app.ProgressDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.TextView;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -16,18 +23,44 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Example of a call to a native method
-        TextView tv = (TextView) findViewById(R.id.sample_text);
-        double tiempoOpenMP=multiplicacionOpenMP(1000,1000,1000);
-        double tiempoSecuencial=multiplicacionSecuencial(1000,1000,1000);
-
-        tv.setText("Tiempo OpenMP: "+tiempoOpenMP+" Tiempo secuencial: "+tiempoSecuencial);
-
         //Numero de procesadores
         int numCores=Runtime.getRuntime().availableProcessors();
 
         TextView tvCores= (TextView) findViewById(R.id.tvCores);
         tvCores.setText("Hay "+numCores+" núcleos.");
+
+        final CheckBox cbAsync= (CheckBox) findViewById(R.id.cbAsynctask);
+        final EditText etDimension= (EditText) findViewById(R.id.etDimension);
+
+        Button realizarOperacion = (Button) findViewById(R.id.btWork);
+        realizarOperacion.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(!etDimension.getText().toString().isEmpty()){
+                    int dimension=Integer.parseInt(etDimension.getText().toString());
+                    if(!cbAsync.isChecked())
+                        operar(dimension);
+                }
+            }
+        });
+
+    }
+
+    private void operar(int dimension){
+        TextView tv = (TextView) findViewById(R.id.sample_text);
+//        ProgressDialog dialog=new ProgressDialog(this);
+//        dialog.setMessage("Calculando con OpenMP");
+//        dialog.setCancelable(false);
+//        dialog.setInverseBackgroundForced(false);
+//        dialog.show();
+
+        double tiempoOpenMP=multiplicacionOpenMP(dimension,dimension,dimension);
+        //dialog.setMessage("Calculando de forma secuencial");
+        double tiempoSecuencial=multiplicacionSecuencial(dimension,dimension,dimension);
+
+        //dialog.hide();
+
+        tv.setText("Tiempo OpenMP: "+tiempoOpenMP+" Tiempo secuencial: "+tiempoSecuencial);
     }
 
     /**
