@@ -1,6 +1,7 @@
 package uniovi.es.computacionparalela;
 
 import android.app.ProgressDialog;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -69,4 +70,20 @@ public class MainActivity extends AppCompatActivity {
      */
     public native double multiplicacionOpenMP(int dimA,int dimB, int dimC);
     public native double multiplicacionSecuencial(int dimA,int dimB, int dimC);
+
+    private class CalculaTiemposOpenMp extends AsyncTask<Integer,Void,Long>{
+
+        @Override
+        protected Long doInBackground(Integer... integers) {
+            if(integers.length==0) {
+                multiplicacionOpenMP(integers[0],integers[0],integers[0]);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Long aLong) {
+            super.onPostExecute(aLong);
+        }
+    }
 }

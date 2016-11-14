@@ -118,14 +118,19 @@ Java_uniovi_es_computacionparalela_MainActivity_multiplicacionSecuencial(JNIEnv 
         Genera_Mat(MatB, Fil_B, Col_B, 2032);
 
 
+        int tmp1, tmp2, tmp3;
         Ctimer(&elapsed, &ucpu, &scpu, 0);
+        for (i = 0; i < Fil_A; i++) {
 
-        for (i = 0; i < Fil_A; i++)
-                for (j = 0; j < Col_B; j++)
-                        for (r = 0; r < Fil_B; r++)
-                                MatC[i * Col_B + j] = MatC[i * Col_B + j] +
-                                                      MatA[i * Col_A + r] * MatB[j * Col_B + r];
-
+            tmp1 = i * Col_B;
+            tmp2 = i * Col_A;
+            for (j = 0; j < Col_B; j++) {
+                tmp3 = j * Col_B;
+                for (r = 0; r < Fil_B; r++)
+                    MatC[tmp1 + j] = MatC[tmp1 + j] +
+                                     MatA[tmp2 + r] * MatB[tmp3 + r];
+            }
+        }
         Ctimer(&elapsed, &ucpu, &scpu, 1);
 
 
@@ -200,18 +205,21 @@ Java_uniovi_es_computacionparalela_MainActivity_multiplicacionOpenMP(JNIEnv *env
         Genera_Mat(MatA, Fil_A, Col_A, 2121);
         Genera_Mat(MatB, Fil_B, Col_B, 2032);
 
-        omp_set_dynamic(1);
-        omp_set_nested(1);
-
+        int tmp1, tmp2, tmp3;
         Ctimer(&elapsed, &ucpu, &scpu, 0);
 
-        #pragma omp parallel for
-        for (i = 0; i < Fil_A; i++)
-                for (j = 0; j < Col_B; j++)
-                        for (r = 0; r < Fil_B; r++)
-                                MatC[i * Col_B + j] = MatC[i * Col_B + j] +
-                                                      MatA[i * Col_A + r] * MatB[j * Col_B + r];
+        #pragma omp parallel for private(j,r,tmp1,tmp2,tmp3) schedule(dynamic)
+        for (i = 0; i < Fil_A; i++) {
 
+                tmp1 = i * Col_B;
+                tmp2 = i * Col_A;
+                for (j = 0; j < Col_B; j++) {
+                        tmp3 = j * Col_B;
+                        for (r = 0; r < Fil_B; r++)
+                                MatC[tmp1 + j] = MatC[tmp1 + j] +
+                                                 MatA[tmp2 + r] * MatB[tmp3 + r];
+                }
+        }
         Ctimer(&elapsed, &ucpu, &scpu, 1);
 
 
