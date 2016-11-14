@@ -1,11 +1,13 @@
 package uniovi.es.computacionparalela;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.AsyncTask;
+import android.os.PowerManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.AutoCompleteTextView;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -19,6 +21,9 @@ public class MainActivity extends AppCompatActivity {
         System.loadLibrary("native-lib");
     }
 
+    ProgressDialog dialog;
+    TextView tvTiempos;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,9 +33,8 @@ public class MainActivity extends AppCompatActivity {
         int numCores=Runtime.getRuntime().availableProcessors();
 
         TextView tvCores= (TextView) findViewById(R.id.tvCores);
-        tvCores.setText("Hay "+numCores+" núcleos.");
-
-        final CheckBox cbAsync= (CheckBox) findViewById(R.id.cbAsynctask);
+        tvCores.setText("El dispositivo dispone de "+numCores+" núcleos.");
+        final CheckBox cbSecuencial= (CheckBox) findViewById(R.id.cbSecuencial);
         final EditText etDimension= (EditText) findViewById(R.id.etDimension);
 
         Button realizarOperacion = (Button) findViewById(R.id.btWork);
@@ -39,29 +43,30 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if(!etDimension.getText().toString().isEmpty()){
                     int dimension=Integer.parseInt(etDimension.getText().toString());
-                    if(!cbAsync.isChecked())
-                        operar(dimension);
+
+                    //Secuencial
+                    if(cbSecuencial.isChecked()) {
+                        dialog.setMessage("Calculando secuencial");
+                        dialog.show();
+                        new CalculaTiemposSecuencial().execute(dimension);
+                    }
+                    //OpenMP
+                    else{
+                        dialog.setMessage("Calculando con OpenMP");
+                        dialog.show();
+                        new CalculaTiemposOpenMp().execute(dimension);
+                    }
                 }
             }
         });
 
-    }
+        dialog=new ProgressDialog(this);
+        dialog.setCancelable(false);
+        dialog.setInverseBackgroundForced(false);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-    private void operar(int dimension){
-        TextView tv = (TextView) findViewById(R.id.sample_text);
-//        ProgressDialog dialog=new ProgressDialog(this);
-//        dialog.setMessage("Calculando con OpenMP");
-//        dialog.setCancelable(false);
-//        dialog.setInverseBackgroundForced(false);
-//        dialog.show();
+        tvTiempos=(TextView) findViewById(R.id.sample_text);
 
-        double tiempoOpenMP=multiplicacionOpenMP(dimension,dimension,dimension);
-        //dialog.setMessage("Calculando de forma secuencial");
-        double tiempoSecuencial=multiplicacionSecuencial(dimension,dimension,dimension);
-
-        //dialog.hide();
-
-        tv.setText("Tiempo OpenMP: "+tiempoOpenMP+" Tiempo secuencial: "+tiempoSecuencial);
     }
 
     /**
@@ -71,19 +76,41 @@ public class MainActivity extends AppCompatActivity {
     public native double multiplicacionOpenMP(int dimA,int dimB, int dimC);
     public native double multiplicacionSecuencial(int dimA,int dimB, int dimC);
 
-    private class CalculaTiemposOpenMp extends AsyncTask<Integer,Void,Long>{
+    private class CalculaTiemposOpenMp extends AsyncTask<Integer, Void, Double> {
 
         @Override
-        protected Long doInBackground(Integer... integers) {
-            if(integers.length==0) {
-                multiplicacionOpenMP(integers[0],integers[0],integers[0]);
-            }
-            return null;
+        protected Double doInBackground(Integer... integers) {
+                return multiplicacionOpenMP(integers[0],integers[0],integers[0]);
         }
 
         @Override
-        protected void onPostExecute(Long aLong) {
-            super.onPostExecute(aLong);
+        protected void onPostExecute(Double aDouble) {
+            dialog.hide();
+            if (aDouble == -4 || aDouble == -3 || aDouble == -5)
+                tvTiempos.setText("No se ha podido reservar la memoria necesaria");
+            else
+                tvTiempos.setText("Tiempo OpenMP: "+aDouble+" segundos.");
+            super.onPostExecute(aDouble);
+
+        }
+    }
+
+    private class CalculaTiemposSecuencial extends AsyncTask<Integer, Void, Double> {
+
+        @Override
+        protected Double doInBackground(Integer... integers) {
+            return multiplicacionSecuencial(integers[0],integers[0],integers[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Double aDouble) {
+            dialog.hide();
+            if (aDouble == -4 || aDouble == -3 || aDouble == -5)
+                tvTiempos.setText("No se ha podido reservar la memoria necesaria");
+            else
+                tvTiempos.setText("Tiempo Secuencial: "+aDouble+" segundos.");
+            super.onPostExecute(aDouble);
+
         }
     }
 }

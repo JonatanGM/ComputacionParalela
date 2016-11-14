@@ -32,8 +32,8 @@
             android:hint="Dimension"
             android:inputType="number" />
         <CheckBox
-            android:text="Operar en asyntask"
-            android:id="@+id/cbAsynctask"
+            android:text="Operar en secuencial"
+            android:id="@+id/cbSecuencial"
             android:layout_height="match_parent"
             android:layout_width="match_parent"
             android:layout_weight="2" />
