@@ -11,7 +11,9 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -34,8 +36,12 @@ public class MainActivity extends AppCompatActivity {
 
         TextView tvCores= (TextView) findViewById(R.id.tvCores);
         tvCores.setText("El dispositivo dispone de "+numCores+" núcleos.");
-        final CheckBox cbSecuencial= (CheckBox) findViewById(R.id.cbSecuencial);
         final EditText etDimension= (EditText) findViewById(R.id.etDimension);
+
+        final RadioButton rbOpenMP = (RadioButton) findViewById(R.id.rbOpenMP);
+        final RadioButton rbOpenBlas = (RadioButton) findViewById(R.id.rbOpenBlas);
+        final RadioButton rbSecuencial = (RadioButton) findViewById(R.id.rbSecuencial);
+
 
         Button realizarOperacion = (Button) findViewById(R.id.btWork);
         realizarOperacion.setOnClickListener(new View.OnClickListener() {
@@ -45,18 +51,27 @@ public class MainActivity extends AppCompatActivity {
                     int dimension=Integer.parseInt(etDimension.getText().toString());
 
                     //Secuencial
-                    if(cbSecuencial.isChecked()) {
+                    if(rbSecuencial.isChecked()) {
                         dialog.setMessage("Calculando secuencial");
                         dialog.show();
                         new CalculaTiemposSecuencial().execute(dimension);
                     }
                     //OpenMP
-                    else{
+                    else if(rbOpenMP.isChecked()){
                         dialog.setMessage("Calculando con OpenMP");
                         dialog.show();
                         new CalculaTiemposOpenMp().execute(dimension);
                     }
+                    //OpenMP
+                    else if(rbOpenBlas.isChecked()){
+                        //dialog.setMessage("Calculando con OpenBlas");
+                        //dialog.show();
+                        //new CalculaTiemposOpenMp().execute(dimension);
+                        Toast.makeText(getApplicationContext(),"Funcionalidad no implementada",Toast.LENGTH_SHORT).show();
+                    }
                 }
+                else
+                    Toast.makeText(getApplicationContext(),"Debe introducir una dimension",Toast.LENGTH_SHORT).show();
             }
         });
 

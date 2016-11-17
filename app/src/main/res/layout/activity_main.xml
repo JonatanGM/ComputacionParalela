@@ -21,22 +21,48 @@
 
     <LinearLayout
         android:orientation="horizontal"
-        android:layout_weight="3"
         android:layout_height="match_parent"
-        android:layout_width="wrap_content">
+        android:layout_width="match_parent">
         <EditText
-            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/etDimension"
-            android:layout_weight="1"
             android:hint="Dimension"
-            android:inputType="number" />
-        <CheckBox
-            android:text="Operar en secuencial"
-            android:id="@+id/cbSecuencial"
-            android:layout_height="match_parent"
-            android:layout_width="match_parent"
-            android:layout_weight="2" />
+            android:inputType="number"
+            android:layout_width="match_parent" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+
+        <RadioGroup
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            <RadioButton
+                android:text="OpenMP"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/rbOpenMP"
+                android:layout_weight="1"
+                android:checked="true" />
+
+            <RadioButton
+                android:text="OpenBlas"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/rbOpenBlas"
+                android:layout_weight="1" />
+
+            <RadioButton
+                android:text="Secuencial"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/rbSecuencial"
+                android:layout_weight="1" />
+        </RadioGroup>
     </LinearLayout>
 
 
